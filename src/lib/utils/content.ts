@@ -805,7 +805,7 @@ const mimeTypeToExtensionMap: Record<string, string> = {
    * @returns 对应的文件扩展名（不带点），如果未找到则返回 undefined
    */
   export function getExtensionFromMimeType(mimeType: string): string  {
-    return mimeTypeToExtensionMap[mimeType.toLowerCase()] || 'bin';
+    return mimeTypeToExtensionMap[mimeType?.toLowerCase()] || 'bin';
   }
   
   /**

@@ -15,10 +15,10 @@ import { Input } from '@/components/ui/input'
 export default  function ImageShow( params : {fileInfo  : FileUrl}){
     const copyContent = async (text:string) => {
         try {
-        await navigator.clipboard.writeText(text);
-        console.log('Content copied to clipboard');
+            await navigator.clipboard.writeText(text);
+            console.log('Content copied to clipboard');
         } catch (err) {
-        console.error('Failed to copy: ', err);
+            console.error('Failed to copy: ', err);
         }
     }   
     let f = params.fileInfo

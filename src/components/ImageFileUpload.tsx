@@ -64,25 +64,6 @@ export default  function ImageFileUpload(
 
   const storageIntf = useStorage();
 
-  // const add_file_callback = {
-  //   onSuccess: async (result:any) => {
-  //     console.log("result.digest", result.digest,'effect',result.effect);
-  //     const rsp =  await suiClient.waitForTransaction({ digest: result.digest,options: {showEffects:true, showEvents:true} })
-  //     if(rsp.effects && rsp.effects.status.status == 'success' && rsp.events){
-  //       console.log('add add_file_callback succ');
-  //     }else{
-  //       console.log('add_file_callback fail ',rsp);
-  //     }
-        
-  //   },
-  //   onError: (error:any) => {
-  //      console.log('add_file_callback error',error);
-  //   },
-  //   onSettled: async (result:any) => {                       
-  //       console.log("add_file_callback settled");
-  //   }
-  // }
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -123,9 +104,7 @@ export default  function ImageFileUpload(
 
         const result = await response.json();
         if(owner){
-            // let profile = await getProfile(suiClient,owner)
-            // if(profile) setProfileId(profile);
-            // console.log('upload success, result =', result);
+
             const p = props.profile;
             const fileInfo =  result.fileInfo as FileInfo;
             if(p && fileInfo){

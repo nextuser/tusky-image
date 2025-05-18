@@ -17,28 +17,13 @@ import { getImageSiteUrl } from "@/lib/utils";
 import { getTuskySiteUrl } from "@/lib/tusky/tusky_common";
 import { Button } from "@/components/ui/button";
 import { Profile } from "@/lib/utils/suiTypes";
+import PaginatedShow from "@/components/paginated_show";
+import { queryFileDataEventsInVault } from "@/lib/utils/suiUtil";
+import { useSearchParams } from "next/navigation";
+import { PaginatedEventsCallback ,emptyFileDataEvents} from "@/lib/utils/suiUtil";
+import { FileDataEvents } from "@/lib/utils/suiUtil";
+import { FileData } from "@/lib/utils/suiParser";
 
-// function getType(fileInfo:FileInfo){
-    
-//     let status = getFileBlob(fileInfo.hash);
-//     if(status == null){
-//         return getExtTypeByContentType(fileInfo.content_type);
-//     }
-//     if(status.status.uploaded){
-//         return 'blob'
-//     } else{
-//         return 'tar'
-//     }
-// }
-
-// // 获取主机和端口信息
-// const getHostAndPort = () => {
-//     const { hostname, port } = window.location;
-//     return {
-//         host: hostname,
-//         port: port || (window.location.protocol === 'https:' ? '443' : '80')
-//     };
-// };
 export default function Page() {
 
     // 使用示例
@@ -47,70 +32,65 @@ export default function Page() {
    const suiClient = useSuiClient();
    const [files ,setFiles] = useState<TuskyFile[]>([]);
    const [nextToken,setNextToken] = useState<string>();
-   const [urlInfo,setUrlInfo] = useState<UrlInfo>()
-   const [profile,setProfile] = useState<Profile>()
+
 
    const queryProfile = async ()=>{
+    console.log('queryProfile enter');
     if(!account || !storage) {
+        console.log('queryProfile accoutn,storage',account,storage);
         return;
     }
     const parentId = storage.profile_map.id.id.bytes
-    let profile = await getProfile(suiClient,parentId,account.address);
+    return  getProfile(suiClient,parentId,account.address);
    }
-   const query_files = async ()=>{
 
-        if(!profile){
+   const [vaultId,setVaultId] = useState<string>()
+   const [urlInfo, setUrlInfo] = useState<UrlInfo>();
+
+     
+   useEffect(()=>{
+    updateUrlInfo(setUrlInfo);
+    queryProfile().then((p)=>{
+        if(!p){ 
+            console.log('queryProfile result',p);
             return;
         }
-        let url = `/api/files_for?vault_id=${encodeURIComponent(profile.vault_id)}`
-        if(nextToken){
-            url += `&next=${encodeURIComponent(nextToken)}`
-        }
+        setVaultId(p.vault_id)
+    });
+   },[account])
 
-        fetch( url,{ method : 'GET', }).then((rsp)=>{
-            if(!rsp.ok) {
-                rsp.json().then((value)=>{
-                    let pe = value.data as Paginated<TuskyFile>
-                    setFiles(pe.items)
-                    setNextToken(pe.nextToken)
-                })
-                return;
-            } else{
-                console.error('query fail', rsp.status, url);
-            }
-        })
-            
-    };
-   useEffect(()=>{
-        queryProfile();
-        updateUrlInfo(setUrlInfo);
-   },[account]);
+   const siteUrl = getSiteUrl(urlInfo);
 
-   useEffect(()=>{
-    query_files();
-   },[profile])
+   const searchParams = useSearchParams();
+   const  isNext = searchParams.get('direction') != 'prev'
+ 
+   const callback : PaginatedEventsCallback<string> = {
+     events:emptyFileDataEvents<string>(),
+     prev : (events : FileDataEvents<string> )=>{  return queryFileDataEventsInVault(vaultId,false, events)},
+     next : (events : FileDataEvents<string> )=>{  return queryFileDataEventsInVault(vaultId,true, events)},
+     home : ()=>{ return  queryFileDataEventsInVault(vaultId,true, undefined)}
+   }
 
-    return (
-        <div>
-            <ul>{ 
-                    files.map( (file:TuskyFile,index:number)=>{
-                    const siteUrl = getSiteUrl(urlInfo);
-                    const fileUrl = getTuskySiteUrl(siteUrl,file)
-                    const file_id =  file.id
-                    const type = getExtensionFromMimeType(file.mimeType);
-                    return (<li key={file_id}>
-                        <Link className="text-blue-900 underline hover:no-underline visited:text-blue-300" 
-                        target='_blank'
-                        key = {file_id}
-                        href={fileUrl} >
-                            {file_id}
-                        </Link> <label>{type}</label>
-                    </li>)
-                    })
-                }
-            </ul>
-            <Button className="text-blue-900 underline hover:no-underline visited:text-blue-300" onClick={query_files} >next</Button>
-            <Link className="text-blue-900 underline hover:no-underline visited:text-blue-300" href="/upload">Upload</Link>
-        </div>
-    )
+
+     const copyContent = async (text:string) => {
+         try {
+         await navigator.clipboard.writeText(text);
+         console.log('Content copied to clipboard');
+         } catch (err) {
+         console.error('Failed to copy: ', err);
+         }
+     }
+
+
+    if(! vaultId){
+        return <h2><Link className="text-blue-900 underline hover:no-underline visited:text-blue-300"
+                    href='/profile'>create profile first</Link></h2>
+    }
+ 
+     return (
+         <div> 
+         <PaginatedShow callback={callback} siteUrl={siteUrl}>
+         </PaginatedShow>
+         </div>
+     )
 }

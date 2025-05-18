@@ -1,18 +1,21 @@
-import { Tusky } from "@tusky-io/ts-sdk";
+import { Paginated, Tusky } from "@tusky-io/ts-sdk";
 import { DEFAULT_CONFIG } from "../utils/blobUtil";
 import { FileInfo } from "../utils/types";
-import { getExtTypeByContentType } from "../utils/content";
+import { getContentTypeByMimetype, getExtTypeByContentType } from "../utils/content";
 import { getSiteUrl } from "../utils";
 import { File as TuskyFile } from '@tusky-io/ts-sdk';
 import { getSigner } from "../utils/tests/local_key";
 import dotenv from 'dotenv'
-dotenv.config();
+import { FileData } from "../utils/types";
 
 function initTuskyByApiKey()
 {
+    dotenv.config();
     const apiKey = process.env.TUSKY_API_KEY
+    
     if(!apiKey){
         console.error('export TUSKY_API_KEY=  first');
+        console.log('env:',process.env);
         process.exit(-1)
     }
 
@@ -71,6 +74,33 @@ export async function getTuskyFile(file_id : string)
     return  getServerTusky().file.get(file_id)
 }
 
-export async function getTuskyFilesFor(vaultId:string,nextToken? :string) {
-    return getServerTusky().file.list({shouldDecrypt : false, vaultId: vaultId,status:'active',nextToken})
+function ConvertTuskyFileToFileData(file : TuskyFile) : FileData{
+    let fileData :FileData = {
+        vault_id : file.vaultId,
+        file_id : file.id,
+        mime_type : getContentTypeByMimetype(file.mimeType),
+        size : file.size,
+        blob_id  : file.blobId 
+    }
+    return fileData
+}
+
+export async function getTuskyFilesFor(vaultId:string,nextToken? :string) :Promise<Paginated<FileData>>{
+    if(!nextToken) nextToken = undefined
+    console.log(`getTuskyFilesFor vaultId ${vaultId}, nextToken ${nextToken}`);
+    
+    const files =await  getServerTusky().file.list({shouldDecrypt : false, vaultId: vaultId,status:'active',nextToken})
+    const result : Paginated<FileData> =  {
+        items: [],
+        nextToken: '',
+        errors: []
+    }
+    console.log('getTuskyFilesFor length,next', files.items.length, files.nextToken);
+    for( let f of files.items){
+        result.items.push(ConvertTuskyFileToFileData(f));
+    }
+    result.nextToken = files.nextToken
+    result.errors = files.errors;
+
+    return result;
 }

@@ -41,9 +41,11 @@ export   type UploadStatus =   {
 export interface FileData {
   vault_id : string,
   file_id : string,
-  owner : string,
+  owner? : string,
+  
   mime_type : number,
   size : number,
+  blob_id ? : string
 }
 
 // public struct FileDataObject has key,store{

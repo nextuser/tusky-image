@@ -8,5 +8,6 @@ export async function getFullUrl(pathname: string = '') {
   
   // 移除 leading slash 避免双斜杠
   const cleanPathname = pathname.startsWith('/') ? pathname.slice(1) : pathname;
-  return `${proto}://${host}/${cleanPathname}`;
+  const path = cleanPathname.length > 0 ?  `${proto}://${host}/${cleanPathname}` : `${proto}://${host}`;
+  return path
 }

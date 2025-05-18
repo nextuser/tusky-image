@@ -5,6 +5,7 @@ import { getHash } from '@/lib/utils';
 import { createServerSearchParamsForServerPage } from 'next/dist/server/request/search-params';
 import { logger } from '@/lib/utils/logger';
 import { getBlobUrl, getServerTusky } from '@/lib/tusky/tusky_server';
+import { fromBase64, toBase64 } from '@mysten/bcs';
 type Context = {
   params: Promise<{
     file_id: string;
@@ -30,6 +31,9 @@ export async function GET(
     const arrayBuffer = await tusky.file.arrayBuffer(file_id)
     const buffer = Buffer.from(arrayBuffer)
     console.log('buffer length',buffer.length);  
+    if(buffer.length < 300){
+      console.log('image buffer string:', String(buffer), 'base64',toBase64(buffer));
+    }
     
     // 设置响应头
     const headers = {

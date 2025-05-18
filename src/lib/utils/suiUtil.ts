@@ -132,6 +132,7 @@ export function calcuate_fee(  config : parser.FeeConfigType, size : number) : n
 }
 
 export async function  getStorage(sc:SuiClient) : Promise<parser.StorageType | undefined>{
+    if(!sc) return undefined;
     const obj = await sc.getObject({ id : config.storage,options:{showContent:true,showBcs:true}});
 
     if(obj.data?.bcs?.dataType == 'moveObject'){
@@ -515,25 +516,85 @@ export async  function queryFileInfoObjects(suiClient:SuiClient, profileId:strin
 }*/
 
 import { FileData , FileAdded} from "./types";
+import { Paginated } from "@tusky-io/ts-sdk";
 import { FileAddedType } from "./suiParser";
 import { resourceLimits } from "worker_threads";
 export type Cursor = EventId|undefined|null
-export type FileDataEvents  ={
+export type FileDataEvents<CursorType>  ={
     fileDatas : FileData[];
-    cursors : Cursor[];
+    cursors : CursorType[];
     cursorIndex : number;
+    loading : boolean;
 }
 
-export function hasNext(events :FileDataEvents){
-    return events.cursors.length > events.cursorIndex
+export interface PaginatedEventsCallback<CursorType>{
+    events: FileDataEvents<CursorType>
+    prev : (events : FileDataEvents<CursorType> )=>Promise<FileDataEvents<CursorType>>,
+    next : (events : FileDataEvents<CursorType> )=>Promise<FileDataEvents<CursorType>>,
+    home : ()=>Promise<FileDataEvents<CursorType>> 
 }
 
-export function emptyFileDataEvents() : FileDataEvents{
-    return { fileDatas:[],cursors : [], cursorIndex : -1 }
+export function hasNext<CursorType>(events :FileDataEvents<CursorType> | undefined){
+    if(!events){ 
+        return false;
+    }
+    return events.cursors.length > events.cursorIndex && events.cursorIndex >= 0
 }
 
-export async function  queryFileDataEvents(sc : SuiClient, next:boolean = true,previous ? : FileDataEvents, ) : Promise<FileDataEvents>{
-    const   result = emptyFileDataEvents();
+export function hasPrev<CursorType>(events :FileDataEvents<CursorType> | undefined){
+    if(!events) {
+        return false;
+    }
+    return events.cursors.length > 0 && events.cursorIndex < events.cursors.length
+}
+
+export function emptyFileDataEvents<CursorType>() : FileDataEvents<CursorType>{
+    return { fileDatas:[],cursors : [], cursorIndex : -1 ,loading : true}
+}
+
+export async function  queryFileDataEventsInVault(vault_id : string|undefined, next:boolean = true,previous ? : FileDataEvents<string>, ) : Promise<FileDataEvents<string>>{
+    const   result = emptyFileDataEvents<string>();
+    if(!vault_id){
+        console.log('queryFileDataEventsInVault vaultId invalid')
+        return result
+    }
+    let cursor = undefined;
+    if(previous ){
+        let index = next ?  previous.cursorIndex  : previous.cursorIndex - 2;
+        if(index < previous.cursors.length  && index >= 0){
+            cursor = previous.cursors[index]
+        }
+    }
+
+    let url = `/api/files_for?vault_id=${encodeURIComponent(vault_id)}`
+    if(cursor){
+        url += `&cursor=${encodeURIComponent(cursor)}`
+    }
+    console.log("images_by/addr  fetch ",url)
+    const rsp = await fetch( url,{ method : 'GET', })
+    result.loading = false;
+    if(rsp.ok) {
+        let value = await rsp.json()
+        console.log('images_by : response json:',value);
+        let pe = value.result as Paginated<FileData>
+        for(let item of  pe.items){
+            result.fileDatas.push(item)
+        } 
+        result.cursorIndex += 1;
+        if(next && result.cursorIndex == result.cursors.length){
+            result.cursors.push(pe.nextToken)
+        } 
+        return result;
+    } else{
+        console.error('query fail', rsp.status, url);
+    }
+
+    return result;
+}
+
+export async function  queryFileDataEvents(sc : SuiClient, next:boolean = true,previous ? : FileDataEvents<Cursor>, ) : Promise<FileDataEvents<Cursor>>{
+    const   result = emptyFileDataEvents<Cursor>();
+    console.log('queryFileDataEvents sc ,next', sc,next);
     if(!sc) {
         return  result
     }
@@ -546,10 +607,8 @@ export async function  queryFileDataEvents(sc : SuiClient, next:boolean = true,p
             cursor = previous.cursors[index]
         }
     }
-
-    
     let events = await sc.queryEvents({query:{MoveEventType:`${config.pkg}::file_blob::FileAdded`},cursor})
-   
+    console.log('query events count:', events.data.length, 'hasNext',events.hasNextPage);
     const ids : string[] = [];
     for(let e of events.data){
         let r = e.parsedJson as FileAdded;
@@ -566,32 +625,11 @@ export async function  queryFileDataEvents(sc : SuiClient, next:boolean = true,p
         result.cursorIndex = 0;
 
     }
-    if(next && events.hasNextPage){
+    if(next && events.hasNextPage && result.cursorIndex == result.cursors.length){
         result.cursors.push(events.nextCursor)
     }
-    
-
-    // let values = await sc.multiGetObjects({ids, options:{showContent:true}})
-    // for(let value of values){
-    //     //console.log('value',value)
-    //     if(value.data?.content?.dataType == 'moveObject'){
-    //         console.log('filedata event  fields', value.data.content.fields);
-    //         //value.data.content.fields as parser.FileAddedType
-           
-    //         let fat = value.data.content.fields as FileAddedType;
-    //         //console.log('fbo', fbo);
-    //         let fd = fat.file_data;
-    //         let f :FileData = {
-    //             vault_id : fd.vault_id,
-    //             file_id : fd.file_id,
-    //             owner : fd.owner,
-    //             mime_type : fd.mime_type,
-    //             size : fd.size,
-    //         }
-    //         //console.log('addFileBlobInfo',f);
-    //         result.fileDatas.push(f);
-    //     }
-    // }
+    result.loading = false
+    console.log('queryFileDataEventsInVault  cursor count,data count, index', result.cursors.length, result.fileDatas.length, result.cursorIndex);
     return result;
 }
 
