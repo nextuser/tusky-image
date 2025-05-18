@@ -8,11 +8,10 @@ use sui::balance::{Self,Balance};
 use sui::coin::Coin;
 use std::ascii::String;
 
-const CONTRACT_COST : u64 = 2_400_000;
-const CONTRACT_FEE : u64 = 3_000_000;
+const CONTRACT_COST : u64 = 1_500_000;
+const CONTRACT_FEE : u64 = 1_000_000;
 const WALRUS_KB_FEE_WAL  : u64 = 150_000;
 const PRICE_WAL_TO_SUI_1000 : u64 = 172;
-
 
 //==========================data struct=================================
 
