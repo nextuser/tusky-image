@@ -9,7 +9,8 @@ dotenv.config();
 
 
 export function getImageUrlByFileData(siteUrl:string,fileData:FileData){
-  if(fileData.blob_id && fileData.blob_id != 'unkown'){
+  console.log('getImageUrlByFileData blob id type',typeof fileData.blob_id , `|${fileData.blob_id}|`)
+  if(fileData.blob_id && fileData.blob_id != 'unknown' && fileData.blob_id.length > 10){
     return `${DEFAULT_CONFIG.initialAggregatorUrl}/v1/blobs/${encodeURIComponent(fileData.blob_id)}`
   }
   return `${siteUrl}/image/${fileData.file_id}`
