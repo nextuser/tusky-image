@@ -10,31 +10,13 @@ import {  calcuate_fee,getProfile,addFile,getStorage} from "../suiUtil";
 import { suiClient } from "@/contracts";
 import fs from "fs";
 import { getContentTypeByExtType,getMimeTypeByContentType } from "../content";
+import {getServerTusky} from '@/lib/tusky/tusky_server'
+import { queryFileDataEvents } from "../suiUtil";
+
 const sc = getServerSideSuiClient();
 const manager = getSigner();
 const client = getLocalSigner();
 const client_addr = client.getPublicKey().toSuiAddress();
-
-// async function getDynamicProfile(sc : SuiClient, 
-//                                 parentId : string, 
-//                                 owner : string) : Promise<Profile|undefined>{
-//     const rsp = await sc.getDynamicFieldObject({
-//         parentId,
-//         name : {
-//             type:'address',
-//             value: owner
-//         }
-//     });
-//     //console.log('profile dynamic field',rsp);
-//     if( rsp.data?.content?.dataType == 'moveObject'){
-//         const f = rsp.data.content.fields as unknown as DynamicField<Address,Struct<Profile>>;
-//         console.log("getDynamicProfile:profile fields",f.id.id,f.value.fields.balance, f.value.fields.file_ids);
-//         return f.value.fields;
-//     } else{
-//         console.log('no data for owner:',owner);
-//     }
-// }
-
 
 /**
  * 查找当前用户的profile
@@ -71,67 +53,11 @@ async function createProfile(suiClient : SuiClient,
     console.log('fail to create profile,not find profile_address', rsp);
 }
 
-// 上传文件,未profile 增加file  , server端operator执行
-
-
-
-
-
-
-/**
- * 查看当前用户的图片列表
- * #. 根据
- * 获取FileBlobObject address
- * public fun get_file_blobs(storage : &Storage,profile:&Profile) : vector<address>
- * 
- * # 根据blob 对象地址,找到对象
-public struct FileBlob has store,copy,drop{
-    file_id : u256,
-    blob_id : u256,
-    start : u32,
-    end : u32,
-    mime_type : u8,
-}
-
-public struct  FileBlobObject has key{
-    id: UID,
-    file_blob : FileBlob
-} 
- *  */ 
-
-
-/**
- * queryEvents
- * public struct FileBlobAddResult has copy,drop{
-    blobs : vector<FileBlob>,
-    sender : address
-}
-
- */
 function queryRecentImages(){
 
 }
 
-// function getTestFileBlobInfo(blobId : string, hash : string){
-//     let fb :FileBlobInfo= {
-//         hash ,
-//         status :{
-//             on_walrus : true,
-//             walrus_info : {
-//                 blobId 
-//             }
-//         },
-//         contentType : 2,
-//         range : {
-//             start : 512,
-//             end : 49152
-//         }
-//     }
-//     return fb;
-// }
 
-import {getServerTusky} from '@/lib/tusky/tusky_server'
-import { queryFileDataEvents } from "../suiUtil";
 async function test_all(){
     const tusky = getServerTusky();
     // let storage = await getStorage(suiClient);
@@ -187,28 +113,32 @@ async function test_all(){
 
 }
 
-
+import { save_fee } from "../suiUtil";
 function test_get_storage(){
     getStorage(sc).then((st)=>{
         if(st){
             console.log('storage balance',st.balance.value,'feeConfig=',st.feeConfig);
-            const size = 33332;
+            const size = 1024*1024;
             const fee = calcuate_fee(st.feeConfig,size);
             console.log('calcuate_fee size of ',size , ' fee is',fee / 1e9);
-            getProfile(sc,st.profile_map.id.id.bytes,client_addr)
-                .then((v:Profile|undefined|null)=>{ 
-                    if(v){
-                        console.log('file_ids', v.file_ids);
-                        console.log('get dynamic profile',v.balance)
-                    } })
+            const count = 50*(1<<30)/size 
+            const total_fee = save_fee(st.feeConfig,size) * count;
+            const year_price = 48//dollars
+            console.log('total fee',total_fee/1e9 ,' SUI');
+            console.log('total 50g files * 100 years cost  ', year_price  * 100,' $')
+            console.log('total cost cover years :',total_fee/1e9/year_price);
+            console.log(` `,  )
         }
     })
 }
+
+
+
 //test_all();
 
 //getRecentBlobs(sc);
 
-//test_get_storage();
+test_get_storage();
 
 function testQueryFee()
 {
@@ -239,5 +169,5 @@ function testQueryFee()
 
 //testQueryFee();
 
-test_all();
+//test_all();
 //initFileBlobs(sc);

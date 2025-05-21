@@ -284,8 +284,8 @@ const handleUploadUrl = async () => {
       )}
 
       {imageDataUrl && (
-        <div className="mb-6 ">
-          <img src={imageDataUrl} alt="Preview" className="max-w-[400px] max-h-[400px] object-contain" />
+        <div className="max-w-[400px] max-h-[400px] overflow-hidden">
+          <img src={imageDataUrl} alt="Preview" className="object-conver" />
         </div>
       )}
       </div>

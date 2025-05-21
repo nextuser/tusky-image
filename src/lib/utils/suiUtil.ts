@@ -131,6 +131,11 @@ export function calcuate_fee(  config : parser.FeeConfigType, size : number) : n
     return Number(config.contract_cost) + Number(config.contract_fee)  + kbs * Number(config.wal_per_kb) * Number(config.price_wal_to_sui_1000) /1000 
 }
 
+export function save_fee(config:parser.FeeConfigType, size : number){
+    let kbs = size >> 10;
+    return kbs * Number(config.wal_per_kb) * Number(config.price_wal_to_sui_1000) /1000 ;
+}
+
 export async function  getStorage(sc:SuiClient) : Promise<parser.StorageType | undefined>{
     if(!sc) return undefined;
     const obj = await sc.getObject({ id : config.storage,options:{showContent:true,showBcs:true}});
@@ -519,6 +524,7 @@ import { FileData , FileAdded} from "./types";
 import { Paginated } from "@tusky-io/ts-sdk";
 import { FileAddedType } from "./suiParser";
 import { resourceLimits } from "worker_threads";
+import { parse } from "path";
 export type Cursor = EventId|undefined|null
 export type FileDataEvents<CursorType>  ={
     fileDatas : FileData[];

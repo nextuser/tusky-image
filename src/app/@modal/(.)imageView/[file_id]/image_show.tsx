@@ -21,9 +21,13 @@ export default  function ImageShow( params : {fileInfo  : FileUrl}){
     console.log('url ',f.url);
     return <div className='flex justify-center items-center fixed inset-0 bg-gray-500/[.8]' onClick={()=>{if(window){ window.history.back()}} }>
                <div  >
-                <img src={f.url} alt={f.name} width={400} height={400} className="rounded-lg" onClick={(e)=>{e.stopPropagation()}}></img>
+               <div className="w-20 h-20 bg-gray-200 rounded overflow-hidden">
+                <img src={f.url} alt={f.name}  className="w-full h-full  object-cover" onClick={(e)=>{e.stopPropagation()}}></img>
+                </div>
                 <Input type="text" value={f.url} disabled={true} onClick={(e)=>{e.stopPropagation()}}/> <br/>
                 <Button onClick={(e)=>{ copyContent(f.url)}}><Copy></Copy>Copy url</Button>
+                
                 </div>
-        </div>
+
+            </div>
 }
