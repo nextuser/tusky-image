@@ -13,18 +13,19 @@ export default function Home() {
     return <div>Connected fist </div>
   }
   const fileUrls :NameUrl[] = [
-    {name:'1. create profile and recharge', url:'/profile'},
-    {name:'2. recharge', url:'/profile?recharge=open'},
-    {name:'3. upload a image', url:'/upload'},
-    {name:'4. my images', url:`/images_by/${account.address}`},
-    {name:'5. recent images', url:'/image_list'},
+    {name:'1. [user] create profile and recharge', url:'/profile'},
+    {name:'2. [user] recharge (optional)', url:'/profile?recharge=open'},
+    {name:'3. [user] upload a image', url:'/upload'},
+    {name:'4. [user] my images', url:`/images_by/${account.address}`},
+    {name:'5. [user] recent images', url:'/image_list'},
+    {name:'6. [admin] with draw storage balance', url:'/profile'},
   ];
   return (
     <div className="  font-[family-name:var(--font-geist-sans)]">
       {
         fileUrls.map((value)=>{
           return <Link href={value.url}  key={value.name}
-                  className="text-blue-900 underline hover:no-underline visited:text-blue-300 ">
+                  className="text-blue-900 underline hover:no-underline visited:text-blue-700 ">
             <h3 className="text-2xl mx-2 px-3 pt-3">{value.name}</h3></Link>
         })
       }
