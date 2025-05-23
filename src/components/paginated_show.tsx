@@ -26,10 +26,10 @@ export default  function PaginatedShow<CursorType>(
 
     console.log('length:',props.callback.events.fileDatas.length);
     if(events && events.loading ){
-        return  <div><h2>Loading</h2></div>
+        return  <div className='mx-4'><h2>Loading</h2></div>
     }
     if(events && events.fileDatas.length == 0){
-        return  <div><h2>no data</h2></div>
+        return  <div className='mx-4'><h2>no data</h2></div>
     }
     return <div className='mx-4'> <div className="flex justify-start flex-wrap ">
     {events &&  events.fileDatas.map( (fileData:FileData,index)=>{
