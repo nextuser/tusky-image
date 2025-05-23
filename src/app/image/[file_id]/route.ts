@@ -6,6 +6,7 @@ import { createServerSearchParamsForServerPage } from 'next/dist/server/request/
 import { logger } from '@/lib/utils/logger';
 import { getBlobUrl, getServerTusky } from '@/lib/tusky/tusky_server';
 import { fromBase64, toBase64 } from '@mysten/bcs';
+import { isBlobValid } from '@/lib/tusky/tusky_common';
 type Context = {
   params: Promise<{
     file_id: string;
@@ -27,7 +28,7 @@ export async function GET(
   console.log("tusky.file.get : image/",file_id);
   const file = await tusky.file.get(file_id) 
   console.log(`image/id  file blobId=|${file.blobId}| typeof blobId`,(typeof file.blobId));
-  if(!file.blobId || file.blobId == 'unknown'){
+  if(!isBlobValid(file)){
     const arrayBuffer = await tusky.file.arrayBuffer(file_id)
     const buffer = Buffer.from(arrayBuffer)
     console.log('buffer length',buffer.length);  

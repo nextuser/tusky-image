@@ -55,77 +55,6 @@ export function getRechargeTx(owner : string,amount_mist : number ){
     return tx;
 }
 
-// export async function getRecentBlobs(sc : SuiClient){
-//     const eventType = `${config.pkg}::file_blob::FileBlobAddResult`;
-//     let rsp = await sc.queryEvents({
-//         query:{
-//             MoveEventType : eventType
-//         },
-//         order :'descending',
-    
-//     })
-//     let blobs : FileBlob[] = [];
-//     for(let e of rsp.data){
-//         if(e.type == eventType){
-//             let r = e.parsedJson as FileBlobAddResult
-//             for(let b of r.blobs){
-//                 blobs.push(b);
-//             }
-//         }
-//     }
-//     console.log( 'file blobs ', blobs);
-//     return blobs
-// }
-
-
-/*
-entry fun add_file_blob(
-            storage : &mut Storage,
-            blob_id: u256,
-            file_ids : vector<u256>,
-            mime_types : vector<u8>,
-            starts : vector<u32>,
-            ends : vector<u32>,
-            ctx : &mut TxContext)
- * @param suiClient 
- * @param owner 
- * @returns 
- */
-
-//  export function getAddBlobTx( blobIdStr :string,fileBlobs: FileBlobInfo[]) : Transaction | null{
-//     const tx = new Transaction();
-//     const file_ids:TransactionObjectArgument[] = [];
-//     const owners : TransactionObjectArgument[] = [];
-//     const starts:TransactionObjectArgument[] = [];
-//     const ends:TransactionObjectArgument[] = [];
-//     const mime_types:TransactionObjectArgument[] = [];
-//     for(let fileBlob of fileBlobs){
-//         const file_id = hash_to_u256(fileBlob.hash)
-//         console.log('file_id',file_id);
-//         file_ids.push(tx.pure.u256(file_id));
-//         starts.push(tx.pure.u32(fileBlob.range.start));
-//         ends.push(tx.pure.u32(fileBlob.range.end));
-//         mime_types.push(tx.pure.u8(fileBlob.contentType));
-//     }
-    
-//     const blobId = blobId_to_u256(blobIdStr);
-//     console.log('blobId', blobId,' from ',blobIdStr);
-//     tx.moveCall({
-//         target:`${config.pkg}::file_blob::add_file_blob`,
-//         arguments:[
-//             tx.object(config.storage),//Storage
-//             tx.pure.u256(blobId),//blob_id
-//             tx.makeMoveVec({ type:'u256', elements: file_ids}),
-//             tx.makeMoveVec({ type:'u8',elements: mime_types}),//mime_types
-//             tx.makeMoveVec({ type:'u32',elements: starts}),//starts
-//             tx.makeMoveVec({ type:'u32',elements: ends})//ends
-//             ]
-//     });
-
-//     tx.setGasBudget(1e8);
-//     return tx;
-// }
-
 export function calcuate_fee(  config : parser.FeeConfigType, size : number) : number{
     let kbs = size >> 10;
     return Number(config.contract_cost) + Number(config.contract_fee)  + kbs * Number(config.wal_per_kb) * Number(config.price_wal_to_sui_1000) /1000 
@@ -156,24 +85,6 @@ export function isBalanceEnough(storage:parser.StorageType,profile:Profile , siz
    let fee = calcuate_fee(storage.feeConfig, size)
    return Number(profile.balance) >= fee;
 }
-// export async function createProfile(suiClient:SuiClient,signer : Keypair) : Promise<string | null>{
-//    console.log('createProfile begin');
-//    const tx = getCreateProfileTx(suiClient,);
-//    const rsp = await suiClient.signAndExecuteTransaction({ transaction:tx,signer,options:{showEffects:true,showObjectChanges:true}});
-//    console.log('digest',rsp.digest);
-//    if(rsp.effects && rsp.effects.status.status == 'success' && rsp.objectChanges){
-     
-//      //console.log("createProfile object changes:",rsp.objectChanges);
-//      for( let o  of rsp.objectChanges){
-//         if(o.type == 'created' && o.objectType ==`${config.pkg}::file_blob::Profile`){
-//             return o.objectId;
-//         }
-//      }
-//    }
-//    console.log("createProfile fail to find profileId,effects:",rsp.effects, ",object changes:",rsp.objectChanges);
-//    return null;
-
-// }
 
 export async function  getProfileId(suiClient :SuiClient, owner :string) : Promise<string | undefined>{
     const tx = new Transaction();
@@ -207,89 +118,6 @@ export async function  getProfileId(suiClient :SuiClient, owner :string) : Promi
         console.log('get profile error',rsp.effects.status.error)
      }
 }
-
-
-
-// export async function getFileBlobsFor(suiClient : SuiClient,
-//                                 owner:string): Promise<parser.FileBlobType[]>{
-                                
-//     const tx = new Transaction();
-//     tx.moveCall({
-//         target : `${config.pkg}::file_blob::get_file_blobs`,
-//         arguments: [tx.object(config.storage), tx.pure.address(owner)]
-//     })
-//     tx.setGasBudget(1e8);
-//     console.log('file_blob::get_file_blobs for owner',owner);
-//     let rsp = await suiClient.devInspectTransactionBlock({transactionBlock:tx, sender : owner});
-//     const fb_ids :string[] = [];
-//     if(rsp.effects?.status.status == 'success' && rsp.results){
-//         for( let result of rsp.results){
-//             if(!result.returnValues){
-//                 console.log('no returnvalues');
-//                 continue;
-//             } 
-//             for(let rv of result.returnValues){
-//                 console.log('rv ',rv[0]);
-//                 if(rv[0].length == 1 && rv[0][0] == 0){
-//                     continue;
-//                 }
-//                 console.log('type:',rv[1]);
-//                 let ret = parser.Vector_Address.parse(new Uint8Array(rv[0]));
-//                 for(let a of ret){
-//                     if(fb_ids.indexOf(a) == -1){
-//                         fb_ids.push(a);
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     console.log('get object ids ',fb_ids);
-//     if(fb_ids.length == 0){
-//         console.log('get profile images ids', rsp);
-//         return []; 
-//     }
-//     return getFileObjectsByIds(suiClient,fb_ids);
-// }
-
-// async function getFileObjectsByIds(suiClient:SuiClient,fb_ids : string[]): Promise<parser.FileBlobType[]>{
-//     let objectRsps = await suiClient.multiGetObjects({
-//         ids:fb_ids,
-//         options:{showBcs:true}
-//     })
-//     let fbs : parser.FileBlobType[] = [];
-//     for(let o of objectRsps){
-//         if(o.data?.bcs?.dataType == 'moveObject'){
-//             let fbo = parser.FileBlobObject.parse(fromBase64(o.data.bcs.bcsBytes)).file_blob;
-//             fbs.push(fbo);
-//         }
-//     }
-//     return fbs;
-// }
-
-
-// export  function getProfile(suiClient :SuiClient, owner :string) : Promise<string | null>{
-//    return suiClient.getOwnedObjects({
-//         owner :owner ,
-//         filter : {
-//             MoveModule :{ package : config.pkg,
-//                           module : 'file_blob'
-//              }
-//         },
-//         options:{showType:true}
-//     }).then( (rsp)=>{
-//         for(let e of rsp.data){
-//             console.log('get profile e',e );
-//             if(e.data && e.data.type == `${config.pkg}::file_blob::Profile`){
-//                 return e.data.objectId
-//             }
-//         }
-//         return null;
-//     }).catch((reason:any)=>{
-//         console.log('suiClient.getOwnedObjects error ',reason);
-//         return null;
-//     });
-
-// }
 
 const PROFILE_CREATE_COST :bigint = 10_000_000n; 
 //entry fun create_profile(storage : &mut Storage,coin : Coin<SUI>,ctx :&mut TxContext)
@@ -386,94 +214,6 @@ export async function addFile(suiClient : SuiClient,signer: Keypair,
     }
     return 0n;
 }
-
-
-/**
- * 添加 FielBlobObject  在服
- * 后台任务task.ts  storage.manager 执行
- */
-// export async function addFileBlob(suiClient:SuiClient,blobId:string,blobs :FileBlobInfo[],signer :Keypair){
-    
-//     let tx = getAddBlobTx(blobId,blobs);
-//     if(!tx){
-//         console.error('get tx failed ');
-//         return;
-//     }
-//     return suiClient.signAndExecuteTransaction({
-//         transaction:tx,
-//         signer,
-//         options:{showEvents:true,showEffects:true}
-//     }).then((rsp)=>{
-//         if(rsp.effects?.status?.status == 'success' ){
-//             const gasCost = getCost(rsp.effects.gasUsed);
-//             console.log('addFileBlob succ  :cost=',Number(gasCost)/1e9);
-
-//             if(!rsp.events){
-//                 console.log('addFileBlob no event ');
-//                 return gasCost;
-//             }
-//             for(let e of rsp.events){
-//                 if(e.type == `${config.pkg}::file_blob::FileBlobAddResult`){
-//                    let result =  e.parsedJson as FileBlobAddResult;
-//                    if(result.fbo_ids.length > 0){
-//                     console.log(`filblob add  sender ${signer.getPublicKey().toSuiAddress()},fbo id :${result.fbo_ids[0]}`);
-//                    }
-//                 }
-//                 console.log('event content :',e.type, e.parsedJson );
-//             }   
-//             return gasCost;
-//         } else{
-//             console.error('fail to addFileBlob',rsp);
-//             return 0n;
-//         }
-//     })
-// }
-
-/*
-
-public fun get_file_blobs(profile : &Profile)  
- * @param suiClient
- */
-// export async  function queryFileBobInfo(suiClient:SuiClient, profileId:string,sender : string){
-
-//      let obj = await suiClient.getObject({
-//        id :profileId,
-//        options:{showBcs:true,showContent:true}
-//      })
-//      const ids : string[] = []; 
-//      console.log(obj);
-//      if(obj.data && obj.data.bcs && obj.data.bcs.dataType == 'moveObject'){
-//         let p = sp.Profile.parse(fromBase64(obj.data.bcs.bcsBytes))
-//         console.log('begin parse');
-//         let blobs = p.file_ids;
-//         blobs.forEach((id)=> ids.push(id));
-//      }
-     
-//      if(obj.data && obj.data.content && obj.data.content.dataType == 'moveObject'){
-//         console.log('fileBlobInfo fields',obj.data.content.fields);
-//      }
-//      console.log('blob ids:',ids);
-//      let objs = await suiClient.multiGetObjects({ids})
-//      for(let blobRsp of objs){
-//         if(blobRsp.data && blobRsp.data.bcs && blobRsp.data.bcs.dataType == 'moveObject'){
-//             let o = parser.FileBlobObject.parse(fromBase64(blobRsp.data.bcs.bcsBytes))
-//             console.log('file blob',o.file_blob.blob_id, o.file_blob);
-//         }
-//      }
-// }
-
-// export async function getFileBlobs(suiClient: SuiClient,file_ids : string[]){
-//     let objs = await suiClient.multiGetObjects({ids})
-//     let result = [];
-//     for(let blobRsp of objs){
-//        if(blobRsp.data && blobRsp.data.bcs && blobRsp.data.bcs.dataType == 'moveObject'){
-//            let o = parser.FileBlobObject.parse(fromBase64(blobRsp.data.bcs.bcsBytes))
-//            console.log('getFileBlobs: file blob',o.file_blob.blob_id, o.file_blob);
-//            result.push(o.file_blob);
-//        }
-//     }
-//     return result;
-// }
 
 export async function getProfile(sc : SuiClient, 
                                 parentId : string, 
@@ -619,6 +359,7 @@ export async function  queryFileDataEvents(sc : SuiClient, next:boolean = true,p
     const ids : string[] = [];
     for(let e of events.data){
         let r = e.parsedJson as FileAdded;
+        r.file_data.timestampMs = e.timestampMs 
         console.log('fileAdded',r.file_data.vault_id,r.file_data.file_id);
         console.log('FileAdded,event',r);
         result.fileDatas.push(r.file_data);

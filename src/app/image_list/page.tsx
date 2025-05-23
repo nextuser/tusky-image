@@ -16,7 +16,6 @@ import { useEffect } from "react";
 import { getSiteUrl, updateUrlInfo,UrlInfo } from "@/lib/client/urlUtil";
 import { File as TuskyFile} from '@tusky-io/ts-sdk'
 import { useSearchParams } from "next/navigation";
-import { getImageUrlByFileData } from "@/lib/tusky/tusky_common";
 import { Cursor } from "@/lib/utils/suiUtil";
 import { PaginatedEventsCallback } from "@/lib/utils/suiUtil";
 import PaginatedShow from "@/components/paginated_show";

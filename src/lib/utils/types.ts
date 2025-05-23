@@ -45,7 +45,8 @@ export interface FileData {
   
   mime_type : number,
   size : number,
-  blob_id ? : string
+  blob_id ? : string,
+  timestampMs : string | null | undefined
 }
 
 // public struct FileDataObject has key,store{

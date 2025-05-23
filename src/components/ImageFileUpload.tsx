@@ -182,13 +182,11 @@ const handleUploadUrl = async () => {
     let arg : File | string;
     let url = (await uploadFile(imageDataUrl) ) || '';
     props.setFileUrl(url);
-    if(url){
-      setFile(null);
-      setImageUrl('');
-      setPreview('');
-      setIsOpen(false)
-      setImageDataUrl('');
-    }
+    setFile(null);
+    setImageUrl('');
+    setPreview('');
+    setIsOpen(false)
+    setImageDataUrl('');
   };
 
 

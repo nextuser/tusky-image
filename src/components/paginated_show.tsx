@@ -19,7 +19,6 @@ export default  function PaginatedShow<CursorType>(
 {
     let [events,setEvents] = useState(emptyFileDataEvents<CursorType>);
     useEffect(()=>{
-
         props.callback.home().then((e)=>{
             setEvents(e)
         });

@@ -7,6 +7,7 @@ import { File as TuskyFile } from '@tusky-io/ts-sdk';
 import { getSigner } from "../utils/tests/local_key";
 import dotenv from 'dotenv'
 import { FileData } from "../utils/types";
+import { isBlobValid } from "./tusky_common";
 
 function initTuskyByApiKey()
 {
@@ -43,9 +44,11 @@ export async function  getImageTypeUrl(request : Request,fileInfo:FileInfo):Prom
    let blob_id :string | undefined = fileInfo.blob_id;
    const ext = getExtTypeByContentType(fileInfo.content_type) 
    if(!blob_id){
-    let file = await getServerTusky().file.get(fileInfo.file_id)
-    blob_id = file.blobId;
-    file.blobId = file.blobId
+        let file = await getServerTusky().file.get(fileInfo.file_id)
+        if(isBlobValid(file)){
+            blob_id = file.blobId;
+            file.blobId = file.blobId
+        }
    }
    if(blob_id){
         const aggregatorUrl = DEFAULT_CONFIG.initialAggregatorUrl;
@@ -80,7 +83,8 @@ function ConvertTuskyFileToFileData(file : TuskyFile) : FileData{
         file_id : file.id,
         mime_type : getContentTypeByMimetype(file.mimeType),
         size : file.size,
-        blob_id  : file.blobId 
+        blob_id  : file.blobId,
+        timestampMs : String(new Date(file.createdAt).getMilliseconds())
     }
     return fileData
 }

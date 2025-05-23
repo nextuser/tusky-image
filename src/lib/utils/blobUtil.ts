@@ -90,7 +90,6 @@ export async function uploadBlob(buffer: Buffer ) : Promise<WalrusInfo>{
     }
     
 }
-////https://aggregator.walrus-testnet.walrus.space/v1/blobs/${blob}
 
 
 
