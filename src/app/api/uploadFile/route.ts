@@ -20,7 +20,6 @@ const suiClient = getServerSideSuiClient();
 export async function POST(request: Request) {
     const tusky = getServerTusky()
     //startDataCollection()
-    //c();  global init will startDataCollection
     console.log("upload/route.ts :post");
     try {
       
@@ -77,7 +76,7 @@ export async function POST(request: Request) {
       }
       
       const file_id =    await tusky.file.upload(profile.vault_id,buffer,{mimeType: getMimeTypeByContentType(contentType)})
-      console.log('upload file :',file_id,'buffer-length',buffer.length);
+      console.log('upload file :',file_id,'buffer-length',buffer.length,'owner',owner,'vault_id', profile.vault_id);
 
       let fileInfo : FileInfo =  {
           file_id ,

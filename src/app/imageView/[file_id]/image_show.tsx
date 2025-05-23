@@ -22,8 +22,13 @@ export default  function ImageShow( params : {fileInfo  : FileUrl}){
         }
     }   
     let f = params.fileInfo
-    return <div className='flex flex-wrap' > <Input type="text" value={f.url} disabled={true} /> <br/>
-             <Button onClick={(e)=>{ copyContent(f.url)}}><Copy></Copy>Copy url</Button>
-            <img src={f.url} alt={f.name} width={300} height={300} className="w-full h-full rounded-lg" onClick={(e)=>{e.stopPropagation()}}></img>
+    return <div className='justify-center mx-10' >
+           
+           <div 
+            className='w-full h-full  object-cover'>
+            <img src={f.url} alt={f.name}  className="w-full h-full rounded-lg" onClick={(e)=>{e.stopPropagation()}}></img>
+           </div>
+           <div> <Input type="text" value={f.url} disabled={true} /> </div>
+           <div ><Button onClick={(e)=>{ copyContent(f.url)}}><Copy></Copy>Copy url</Button></div>
         </div>
 }

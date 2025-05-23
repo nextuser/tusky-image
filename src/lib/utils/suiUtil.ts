@@ -613,12 +613,13 @@ export async function  queryFileDataEvents(sc : SuiClient, next:boolean = true,p
             cursor = previous.cursors[index]
         }
     }
+    console.log(`event type : ${config.pkg}::file_blob::FileAdded`);
     let events = await sc.queryEvents({query:{MoveEventType:`${config.pkg}::file_blob::FileAdded`},cursor})
     console.log('query events count:', events.data.length, 'hasNext',events.hasNextPage);
     const ids : string[] = [];
     for(let e of events.data){
         let r = e.parsedJson as FileAdded;
-        console.log('fileadded',r.file_data.vault_id,r.file_data.file_id);
+        console.log('fileAdded',r.file_data.vault_id,r.file_data.file_id);
         console.log('FileAdded,event',r);
         result.fileDatas.push(r.file_data);
     }

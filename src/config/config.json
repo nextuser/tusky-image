@@ -1,6 +1,6 @@
 {
-    "env": "mainnet",
-    "pkg": "0x706059bb65434de1ab6ed3acdea3ddf48bf0fc391d1d65fe20f305ab7f6ec2ec",
-    "storage": "0x0a8c117f0e7bda5728826d447d0f92c6f5e3d22b80ee5e1fd8457c73ebb04782",
-    "operator": "0xafe36044ef56d22494bfe6231e78dd128f097693f2d974761ee4d649e61f5fa2"
+    "env": "testnet",
+    "pkg": "0x9d71eb1497f5e6caaa5ce13b5fb9483efd6eeb9841aaddaf19bb9ad0480534a3",
+    "storage": "0x33d2799cdd3a9d1988b074a30c5ef311e4574d5b71a1b84a819ac4696888ddb7",
+    "operator": "0x5e23b1067c479185a2d6f3e358e4c82086032a171916f85dc9783226d7d504de"
 }

@@ -18,7 +18,7 @@ export default function Home() {
     {name:'3. [user] upload a image', url:'/upload'},
     {name:'4. [user] my images', url:`/images_by/${account.address}`},
     {name:'5. [user] recent images', url:'/image_list'},
-    {name:'6. [admin] with draw storage balance', url:'/profile'},
+    {name:'6. [admin] withdraw storage balance', url:'/profile'},
   ];
   return (
     <div className="  font-[family-name:var(--font-geist-sans)]">
