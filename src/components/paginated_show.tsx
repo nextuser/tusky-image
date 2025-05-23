@@ -31,7 +31,7 @@ export default  function PaginatedShow<CursorType>(
     if(events && events.fileDatas.length == 0){
         return  <div><h2>no data</h2></div>
     }
-    return <div> <div className="flex justify-start flex-wrap ">
+    return <div className='mx-4'> <div className="flex justify-start flex-wrap ">
     {events &&  events.fileDatas.map( (fileData:FileData,index)=>{
                 const type = getExtTypeByContentType(fileData.mime_type)
                 const file_id = fileData.file_id
@@ -46,7 +46,7 @@ export default  function PaginatedShow<CursorType>(
                     </div>)
                 })
     }</div>
-    <div className="flex flex-row mx-2 px-2 pt-2">
+    <div className="flex flex-row  px-2 pt-2">
         <Button  onClick={ () => props.callback.home().then((r)=>setEvents(r))}
         
         className="bg-blue-300 hover:bg-blue-400 text-gray-800 font-bold py-1 px-2 rounded-xs "

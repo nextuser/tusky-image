@@ -138,7 +138,7 @@ function test_get_storage(){
 
 //getRecentBlobs(sc);
 
-test_get_storage();
+//test_get_storage();
 
 function testQueryFee()
 {
@@ -149,25 +149,19 @@ function testQueryFee()
         }
 
 
-        let fileSizes = [100,200,300,400,1000,2000];
-        for(let l of fileSizes){
-            const f  = calcuate_fee(st.feeConfig,l * 1024);
-            console.log(`${l} KB Fee ${f/1e9 } SUI`);
+        let step = 100;
+        for(let i = 0 ; i < 2000; i += step){
+            const size = i + step; 
+            const l = size * 1024;
+            const f  = calcuate_fee(st.feeConfig,l);
+            console.log(`${l/1024}KB    ${f/1e9 }`);
         }
         console.log('feeConfig', st.feeConfig);
-        // getProfile(suiClient,st.profile_map.id.id.bytes,client_addr).then((profile)=>{
-        //     if(!profile){
-        //         console.error('not found profile')
-        //         return;
-        //     }
-
-        // });
     });
-    
 }
 
 
-//testQueryFee();
+testQueryFee();
 
 //test_all();
 //initFileBlobs(sc);
